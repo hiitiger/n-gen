@@ -90,37 +90,22 @@ module.exports = class extends Generator {
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
 
-        this.fs.copyTpl(
-            this.templatePath('js/index.js.tmpl'),
-            this.destinationPath('js/index.js'), {
-                pkgName: pkg.name,
-                pkgSafeName: safePkgName(pkg.name)
-            }
-        );
+        const files = [
+            'js/index.js',
+            'js/index.d.ts',
+            'src/main.cc',
+            'binding.gyp'
+        ]
 
-        this.fs.copyTpl(
-            this.templatePath('js/index.d.ts.tmpl'),
-            this.destinationPath('js/index.d.ts'), {
-                pkgName: pkg.name,
-                pkgSafeName: safePkgName(pkg.name)
-            }
-        );
-
-        this.fs.copyTpl(
-            this.templatePath('src/main.cc.tmpl'),
-            this.destinationPath('src/main.cc'), {
-                pkgName: pkg.name,
-                pkgSafeName: safePkgName(pkg.name)
-            }
-        );
-
-        this.fs.copyTpl(
-            this.templatePath('binding.gyp.tmpl'),
-            this.destinationPath('binding.gyp'), {
-                pkgName: pkg.name,
-                pkgSafeName: safePkgName(pkg.name)
-            }
-        );
+        files.forEach((value) => {
+            this.fs.copyTpl(
+                this.templatePath(value + '.tmpl'),
+                this.destinationPath(value), {
+                    pkgName: pkg.name,
+                    pkgSafeName: safePkgName(pkg.name),
+                }
+            )
+        })
 
         if (this.options.sdk) {
             fse.ensureDirSync(this.destinationPath('sdk'))
