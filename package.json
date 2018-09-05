@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "lodash": "^4.17.10",
     "fs-extra": "^7.0.0",
     "inquirer-npm-name": "^3.0.0",
     "yeoman-generator": "^3.1.1"
@@ -20,7 +21,6 @@
     "generators"
   ],
   "devDependencies": {
-    "eslint": "^5.5.0",
-    "lodash": "^4.17.10"
+    "eslint": "^5.5.0"
   }
 }
