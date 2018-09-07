@@ -1,13 +1,11 @@
 const path = require('path');
-const fse = require('fs-extra')
+const fse = require('fs-extra');
 const Generator = require('yeoman-generator');
 const askName = require('inquirer-npm-name');
-const _ = require('lodash');
-const extend = _.merge;
-
-function safePkgName(str){
-    return str.replace(/-/g, '_')
-}
+const {
+    safePkgName,
+    extend
+} = require('../../utils/utils');
 
 module.exports = class extends Generator {
     constructor(args, opts) {
@@ -18,7 +16,7 @@ module.exports = class extends Generator {
             required: false,
             default: false,
             desc: 'include native sdk'
-        })
+        });
     }
 
     initializing() {
@@ -45,10 +43,10 @@ module.exports = class extends Generator {
             });
         } else {
             askedName = askName({
-                    name: 'name',
-                    default: path.basename(process.cwd())
-                },
-                this
+                name: 'name',
+                default: path.basename(process.cwd())
+            },
+            this
             );
         }
 
@@ -61,7 +59,7 @@ module.exports = class extends Generator {
 
     default () {
         if (this.options.sdk) {
-            this.log('sdk is true')
+            this.log('sdk is true');
         }
     }
 
@@ -82,11 +80,11 @@ module.exports = class extends Generator {
                 'node-gyp': '^3.7.0'
             },
             scripts: {
-                "install": "node-gyp rebuild",
-                "build": "node-gyp build",
-                "compile": "node-gyp rebuild",
+                'install': 'node-gyp rebuild',
+                'build': 'node-gyp build',
+                'compile': 'node-gyp rebuild',
             }
-        }, currentPkg)
+        }, currentPkg);
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
 
@@ -95,7 +93,7 @@ module.exports = class extends Generator {
             'js/index.d.ts',
             'src/main.cc',
             'binding.gyp'
-        ]
+        ];
 
         files.forEach((value) => {
             this.fs.copyTpl(
@@ -104,14 +102,14 @@ module.exports = class extends Generator {
                     pkgName: pkg.name,
                     pkgSafeName: safePkgName(pkg.name),
                 }
-            )
-        })
+            );
+        });
 
         if (this.options.sdk) {
-            fse.ensureDirSync(this.destinationPath('sdk'))
-            fse.ensureDirSync(this.destinationPath('sdk/include'))
-            fse.ensureDirSync(this.destinationPath('sdk/lib'))
-            fse.ensureDirSync(this.destinationPath('sdk/bin'))
+            fse.ensureDirSync(this.destinationPath('sdk'));
+            fse.ensureDirSync(this.destinationPath('sdk/include'));
+            fse.ensureDirSync(this.destinationPath('sdk/lib'));
+            fse.ensureDirSync(this.destinationPath('sdk/bin'));
         }
     }
 };

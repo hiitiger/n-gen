@@ -1,15 +1,11 @@
 const Generator = require('yeoman-generator');
 
 const path = require('path');
-const fse = require('fs-extra')
 const askName = require('inquirer-npm-name');
-const _ = require('lodash');
-const extend = _.merge;
-
-function safePkgName(str) {
-    return str.replace(/-/g, '_')
-}
-
+const {
+    safePkgName,
+    extend
+} = require('../../utils/utils');
 
 module.exports = class extends Generator {
     constructor(args, opts) {
@@ -19,7 +15,14 @@ module.exports = class extends Generator {
             type: Boolean,
             required: true,
             desc: 'include preload api'
-        })
+        });
+
+        this.option('tool', {
+            type: Boolean,
+            required: false,
+            default: false,
+            desc: 'include tool scripts'
+        });
     }
 
     initializing() {
@@ -46,10 +49,10 @@ module.exports = class extends Generator {
             });
         } else {
             askedName = askName({
-                    name: 'name',
-                    default: path.basename(process.cwd())
-                },
-                this
+                name: 'name',
+                default: path.basename(process.cwd())
+            },
+            this
             );
         }
 
@@ -62,7 +65,12 @@ module.exports = class extends Generator {
 
     default () {
         if (this.options.api) {
-            this.log('api is true')
+            this.log('api is true');
+        }
+
+        if (this.options.tool) {
+            this.log('tool is true');
+            this.composeWith(require.resolve('../tool'));
         }
     }
 
@@ -102,7 +110,7 @@ module.exports = class extends Generator {
                 'webpack-cli': '^3.1.0',
                 'awesome-typescript-loader': '^5.2.0'
             },
-        }, currentPkg)
+        }, currentPkg);
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
 
@@ -124,7 +132,7 @@ module.exports = class extends Generator {
             'tslint.json',
             'tsconfig.json',
             'webpack.config.renderer.js',
-        ]
+        ];
 
         files.forEach((value) => {
             this.fs.copyTpl(
@@ -134,10 +142,10 @@ module.exports = class extends Generator {
                     pkgSafeName: safePkgName(pkg.name),
                     companyName: pkg.name,
                 }
-            )
-        })
+            );
+        });
 
-        this.fs.copy(this.templatePath('assets'), this.destinationPath('assets'))
-        this.fs.copy(this.templatePath('dist'), this.destinationPath('dist'))
+        this.fs.copy(this.templatePath('assets'), this.destinationPath('assets'));
+        this.fs.copy(this.templatePath('dist'), this.destinationPath('dist'));
     }
 };
