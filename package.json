@@ -1,6 +1,6 @@
 {
   "name": "generator-ngen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "generators"
   ],
   "devDependencies": {
+    "colors": "^1.3.2",
     "eslint": "^5.5.0"
   }
 }

@@ -17,6 +17,13 @@ module.exports = class extends Generator {
             default: false,
             desc: 'include native sdk'
         });
+
+        this.option('tool', {
+            type: Boolean,
+            required: false,
+            default: false,
+            desc: 'include tool scripts'
+        });
     }
 
     initializing() {
@@ -60,6 +67,10 @@ module.exports = class extends Generator {
     default () {
         if (this.options.sdk) {
             this.log('sdk is true');
+        }
+        if (this.options.tool) {
+            this.log('tool is true');
+            this.composeWith(require.resolve('../tool'));
         }
     }
 
