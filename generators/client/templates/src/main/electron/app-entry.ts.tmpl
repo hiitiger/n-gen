@@ -10,9 +10,9 @@ import { settings } from "./native/settings";
 
 enum AppWindows {
     main = "main",
-    loading = "loading",
+    loading = "loading"
 }
-const PREADLOAD_JS = path.join(__dirname, "./webpreload.js");
+const PRELOAD_JS = path.join(__dirname, "./webpreload.js");
 
 class Application {
     private windows: Map<string, Electron.BrowserWindow>;
@@ -65,11 +65,11 @@ class Application {
                     }
 
                     logger("client").error(
-                        `main window load fail ${errorCode} ${errorDescription}`,
+                        `main window load fail ${errorCode} ${errorDescription}`
                     );
 
                     window.reload();
-                },
+                }
             );
 
             window.webContents.on("crashed", (event, killed) => {
@@ -89,7 +89,7 @@ class Application {
                 logger("client").info("main window unresponsive");
             });
 
-            window.on("close", (event) => {
+            window.on("close", event => {
                 if (this.markQuit) {
                     return;
                 }
@@ -120,6 +120,10 @@ class Application {
             frame: false,
             center: true,
             backgroundColor: "#282b30",
+            webPreferences: {
+                nodeIntegration: true,
+                preload: PRELOAD_JS
+            }
         };
         const mainWindow = this.createWindow(AppWindows.main, options);
         this.mainWindow = mainWindow;
@@ -157,7 +161,7 @@ class Application {
                 height: 480,
                 show: false,
                 resizable: false,
-                frame: false,
+                frame: false
             };
             loadingWindow = this.createWindow(AppWindows.loading, options);
             loadingWindow.loadURL(global.CONFIG.loadingUrl);
@@ -209,20 +213,20 @@ class Application {
                     label: "OpenMainWindow",
                     click: () => {
                         this.showAndFocusWindow(AppWindows.main);
-                    },
+                    }
                 },
                 {
                     label: "About",
                     click: () => {
                         this.showAbout();
-                    },
+                    }
                 },
                 {
                     label: "Quit",
                     click: () => {
                         this.quit();
-                    },
-                },
+                    }
+                }
             ]);
             this.tray.setToolTip("WelCome");
             this.tray.setContextMenu(contextMenu);
@@ -238,7 +242,6 @@ class Application {
 
         this.createMainWindow();
         this.openLoadingWindow();
-
     }
 
     public webReady() {
@@ -247,7 +250,6 @@ class Application {
             this.closeWindow(AppWindows.loading);
             this.showAndFocusWindow(AppWindows.main);
             this.setupSystemTray();
-
         }
     }
 
@@ -277,15 +279,15 @@ class Application {
 
     private createWindow(
         name: AppWindows,
-        options: Electron.BrowserWindowConstructorOptions,
+        options: Electron.BrowserWindowConstructorOptions
     ) {
         const { webPreferences } = options;
         options = {
             ...options,
             webPreferences: {
-                ...webPreferences,
                 nodeIntegration: false,
-            },
+                ...webPreferences
+            }
         };
 
         const window = new BrowserWindow(options);
@@ -299,7 +301,7 @@ class Application {
                 if (input.key === "F12" && input.type === "keyDown") {
                     window.webContents.openDevTools();
                 }
-            },
+            }
         );
         window.setMenu(null);
         return window;

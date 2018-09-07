@@ -124,6 +124,7 @@ module.exports = class extends Generator {
             'src/main/electron/native/settings.ts',
             'src/main/electron/preload/sdk.ts',
             'src/main/electron/preload/settings.ts',
+            'src/main/electron/preload/logger.ts',
             'src/main/utils/debug.ts',
             'src/main/utils/config.ts',
             'src/main/utils/logger.ts',

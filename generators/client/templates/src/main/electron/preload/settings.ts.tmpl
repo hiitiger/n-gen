@@ -1,24 +1,25 @@
-import { remote } from "electron"
+import { remote } from "electron";
 
-const remoteSettings = remote.require("./electron/native/settings.js").settings
-
+const remoteSettings = remote.require("./electron/native/settings.js").settings;
 
 function get(name: string) {
     const defaultValue =
-    arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined
-    return remoteSettings.get(name, defaultValue)
+        arguments.length > 1 && arguments[1] !== undefined
+            ? arguments[1]
+            : undefined;
+    return remoteSettings.get(name, defaultValue);
 }
 
 function set(name: string, value: any) {
-    remoteSettings.set(name, value)
+    remoteSettings.set(name, value);
 }
 
 function save() {
-    return remoteSettings.save()
+    return remoteSettings.save();
 }
 
 export default {
     get,
     set,
     save
-}
+};

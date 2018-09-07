@@ -48,12 +48,12 @@ class PersistenceSettings {
                     this.filePath,
                     toSaveValue,
                     { encoding: "utf-8" },
-                    (error) => {
+                    error => {
                         if (error) {
                             return reject(error);
                         }
                         resolve();
-                    },
+                    }
                 );
             }
         });
@@ -63,7 +63,7 @@ class PersistenceSettings {
         const toSaveValue = JSON.stringify(this.config, null, 2);
         this.lastValue = toSaveValue;
         fs.writeFileSync(this.filePath, toSaveValue, {
-            encoding: "utf-8",
+            encoding: "utf-8"
         });
     }
 }

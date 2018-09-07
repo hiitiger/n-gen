@@ -21,7 +21,7 @@ CONFIG.appName = "<%= pkgName %>";
 CONFIG.appDataDir = path.join(
     ElectronApp.getPath("appData"),
     CONFIG.companyName.toLowerCase(),
-    CONFIG.appName.toLowerCase(),
+    CONFIG.appName.toLowerCase()
 );
 
 CONFIG.distDir = path.join(__dirname, "../../");
@@ -37,7 +37,7 @@ if (global.DEBUG) {
 }
 
 CONFIG.loadingUrl = fileUrl(
-    path.join(CONFIG.distDir, "index/loading/loading.html"),
+    path.join(CONFIG.distDir, "index/loading/loading.html")
 );
 
 CONFIG.settingsFile = path.join(CONFIG.appDataDir, "settings.json");

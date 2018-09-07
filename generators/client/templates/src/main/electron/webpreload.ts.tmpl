@@ -1,7 +1,8 @@
 import sdk from "./preload/sdk";
 import settings from "./preload/settings";
+import logger from "./preload/logger";
 
-const api = { sdk, settings };
+const api = { sdk, settings, logger };
 
 process.once("loaded", () => {
     const window: any = global;

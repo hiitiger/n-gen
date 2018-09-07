@@ -23,16 +23,16 @@ function installDevtron() {
 function installVueDevtool() {
     const dir = path.join(
         process.env.LOCALAPPDATA!,
-        "Google/Chrome/User Data/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd",
+        "Google/Chrome/User Data/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd"
     );
     if (fs.existsSync(dir)) {
         const files = fs
             .readdirSync(dir)
-            .map((filename) => {
+            .map(filename => {
                 const file = path.join(dir, filename);
                 return {
                     file,
-                    mtime: fs.statSync(file).mtime,
+                    mtime: fs.statSync(file).mtime
                 };
             })
             .sort((a, b) => {
@@ -56,7 +56,7 @@ function installDevtools() {
 function setupDirs() {
     const subDirs = ["cache", "log"];
     fse.ensureDirSync(global.CONFIG.appDataDir);
-    subDirs.forEach((dir) => {
+    subDirs.forEach(dir => {
         dir = path.join(global.CONFIG.appDataDir, dir);
         fse.ensureDirSync(dir);
     });
@@ -72,7 +72,7 @@ function setupUserAgent() {
             details.requestHeaders["User-Agent"] =
                 details.requestHeaders["User-Agent"] + " " + sdkInfo;
             callback({ cancel: false, requestHeaders: details.requestHeaders });
-        },
+        }
     );
 }
 
@@ -82,7 +82,7 @@ function beforeElectronReady() {
     }
     setupDirs();
 
-    process.on("uncaughtException", (err) => {
+    process.on("uncaughtException", err => {
         logger("main").error(`Caught exception: ${err}\n`);
     });
 }
@@ -96,7 +96,6 @@ function onElectronReady() {
 
     setupUserAgent();
 }
-
 
 function startApp() {
     logger("main").info("startApp");

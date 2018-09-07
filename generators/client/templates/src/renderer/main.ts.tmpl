@@ -1,12 +1,12 @@
-import { ipcRenderer, remote } from "electron"
+import { ipcRenderer, remote } from "electron";
 
-import { WEBAPP_EVENT } from "../main/electron/events"
+import { WEBAPP_EVENT } from "../main/electron/events";
 
 const quit = () => {
-    ipcRenderer.send(WEBAPP_EVENT.APP.QUIT)
-}
+    ipcRenderer.send(WEBAPP_EVENT.APP.QUIT);
+};
 
-const quitButton = document.getElementById("quit") as HTMLButtonElement
-quitButton.addEventListener("click", quit)
+const quitButton = document.getElementById("quit") as HTMLButtonElement;
+quitButton.addEventListener("click", quit);
 
-const { api } = window as any
+const { api } = window as any;
