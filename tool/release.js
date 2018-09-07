@@ -7,8 +7,6 @@ const path = require('path');
 
 const colors = require('colors/safe');
 
-const prerelease = require('./prerelease');
-
 function getPackage() {
     const data = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8');
     const pkg = JSON.parse(data);
@@ -56,7 +54,6 @@ function run() {
     const branch = 'release/' + version;
     checkNewBranch(branch);
     checkBranch(branch);
-    prerelease();
     pushBranchToRemote(branch);
 }
 
