@@ -1,0 +1,40 @@
+import { app as ElectornApp } from "electron";
+import * as path from "path";
+
+import * as log4js from "log4js";
+
+const logFile = path.join(
+    global.CONFIG.appDataDir,
+    "log",
+    `${global.CONFIG.appName}.log`.toLowerCase(),
+);
+
+const stdout = global.DEBUG;
+
+log4js.configure({
+    appenders: {
+        file: {
+            type: "file",
+            filename: logFile,
+        },
+        out: {
+            type: "stdout",
+        },
+    },
+    categories: {
+        default: {
+            appenders: stdout ? ["file", "out"] : ["file"],
+            level: "info",
+        },
+    },
+});
+
+export function logger(name: string) {
+    return log4js.getLogger(name);
+}
+
+export function shutdownLogger() {
+    log4js.shutdown((err) => {
+        return err && console.log(err) && null;
+    });
+}

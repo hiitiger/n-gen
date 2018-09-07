@@ -1,0 +1,14 @@
+import { remote } from "electron"
+const remoteSdk = remote.require("./electron/native/sdk")
+
+const sdk = {
+    getSdkVersion(): string {
+        return remoteSdk.getSdkVersion()
+    },
+
+    getSdkInfo(): any {
+        return remoteSdk.getSdkInfo()
+    },
+}
+
+export default sdk

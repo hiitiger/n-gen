@@ -1,0 +1,79 @@
+import * as fs from "fs";
+
+import * as fse from "fs-extra";
+
+class PersistenceSettings {
+    private config: any;
+    private filePath: string;
+    private lastValue: string;
+    constructor(filePath: string) {
+        this.filePath = filePath;
+        if (fs.existsSync(this.filePath)) {
+            try {
+                this.lastValue = fs.readFileSync(this.filePath, "utf8");
+                this.config = JSON.parse(this.lastValue);
+            } catch (err) {
+                console.log(err);
+                this.config = {};
+                this.lastValue = "";
+            }
+        } else {
+            this.config = {};
+            this.lastValue = "";
+        }
+    }
+
+    public get(name: string, defaultValue?: any) {
+        return this.config.hasOwnProperty(name)
+            ? this.config[name]
+            : defaultValue;
+    }
+
+    public set(name: string, value: any) {
+        this.config[name] = value;
+        Promise.resolve().then(() => this.save());
+    }
+
+    public remove(name: string) {
+        delete this.config[name];
+        Promise.resolve().then(() => this.save());
+    }
+
+    public save() {
+        return new Promise((resolve, reject) => {
+            const toSaveValue = JSON.stringify(this.config, null, 2);
+            if (this.lastValue !== toSaveValue) {
+                this.lastValue = toSaveValue;
+                fs.writeFile(
+                    this.filePath,
+                    toSaveValue,
+                    { encoding: "utf-8" },
+                    (error) => {
+                        if (error) {
+                            return reject(error);
+                        }
+                        resolve();
+                    },
+                );
+            }
+        });
+    }
+
+    public saveSync() {
+        const toSaveValue = JSON.stringify(this.config, null, 2);
+        this.lastValue = toSaveValue;
+        fs.writeFileSync(this.filePath, toSaveValue, {
+            encoding: "utf-8",
+        });
+    }
+}
+
+const defSettingsFile = global.CONFIG.settingsFile;
+
+if (!fs.existsSync(defSettingsFile)) {
+    fse.ensureFileSync(defSettingsFile);
+}
+
+const settings = new PersistenceSettings(defSettingsFile);
+
+export { settings, PersistenceSettings };

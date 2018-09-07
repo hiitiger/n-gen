@@ -1,0 +1,136 @@
+import { app as ElectronApp, BrowserWindow, session } from "electron";
+
+import * as fs from "fs";
+import * as path from "path";
+import "./utils/config";
+import { logger, shutdownLogger } from "./utils/logger";
+
+import { Application } from "./electron/app-entry";
+
+import * as fse from "fs-extra";
+
+logger("main").info("start...");
+logger("main").info("CONFIG", { DEBUG: global.DEBUG, CONFIG: global.CONFIG });
+
+function installDevtron() {
+    console.log("Installing Devtron");
+    const devtron = require("devtron");
+    devtron.uninstall();
+    devtron.install();
+    console.log("Installed Devtron");
+}
+
+function installVueDevtool() {
+    const dir = path.join(
+        process.env.LOCALAPPDATA!,
+        "Google/Chrome/User Data/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd",
+    );
+    if (fs.existsSync(dir)) {
+        const files = fs
+            .readdirSync(dir)
+            .map((filename) => {
+                const file = path.join(dir, filename);
+                return {
+                    file,
+                    mtime: fs.statSync(file).mtime,
+                };
+            })
+            .sort((a, b) => {
+                return a.mtime > b.mtime ? -1 : 1;
+            });
+
+        // tslint:disable-next-line:variable-name
+        const vue_dev_extension = files.length ? files[0].file : null;
+        if (vue_dev_extension && fs.existsSync(vue_dev_extension)) {
+            logger("main").info("install vue devtool", vue_dev_extension);
+            BrowserWindow.addDevToolsExtension(vue_dev_extension);
+        }
+    }
+}
+
+function installDevtools() {
+    installDevtron();
+    installVueDevtool();
+}
+
+function setupDirs() {
+    const subDirs = ["cache", "log"];
+    fse.ensureDirSync(global.CONFIG.appDataDir);
+    subDirs.forEach((dir) => {
+        dir = path.join(global.CONFIG.appDataDir, dir);
+        fse.ensureDirSync(dir);
+    });
+}
+
+function setupUserAgent() {
+    const sdkInfo = `${global.CONFIG.appName.toLowerCase()}/${
+        global.CONFIG.sdkVersion
+    }`;
+
+    session.defaultSession!.webRequest.onBeforeSendHeaders(
+        (details: any, callback: any) => {
+            details.requestHeaders["User-Agent"] =
+                details.requestHeaders["User-Agent"] + " " + sdkInfo;
+            callback({ cancel: false, requestHeaders: details.requestHeaders });
+        },
+    );
+}
+
+function beforeElectronReady() {
+    if (global.DEBUG || global.CONFIG.debug) {
+        ElectronApp.commandLine.appendSwitch("ignore-certificate-errors");
+    }
+    setupDirs();
+
+    process.on("uncaughtException", (err) => {
+        logger("main").error(`Caught exception: ${err}\n`);
+    });
+}
+
+beforeElectronReady();
+
+function onElectronReady() {
+    if (global.DEBUG) {
+        installDevtools();
+    }
+
+    setupUserAgent();
+}
+
+
+function startApp() {
+    logger("main").info("startApp");
+
+    logger("main").info("start Application");
+    const appEntry = new Application();
+    global.appEntry = appEntry;
+
+    appEntry.init(__dirname);
+    appEntry.start();
+}
+
+ElectronApp.on("ready", () => {
+    logger("main").info("ready...");
+    onElectronReady();
+    startApp();
+});
+
+ElectronApp.on("window-all-closed", () => {
+    logger("main").info("window-all-closed");
+    ElectronApp.quit();
+});
+
+ElectronApp.on("activate", () => {
+    if (global.appEntry) {
+        global.appEntry.activate();
+    }
+});
+
+ElectronApp.on("will-quit", () => {
+    logger("main").info("will-quit...");
+});
+
+ElectronApp.on("quit", () => {
+    logger("main").info("quit...");
+    shutdownLogger();
+});
