@@ -4,7 +4,8 @@ const Generator = require('yeoman-generator');
 const askName = require('inquirer-npm-name');
 const {
     safePkgName,
-    extend
+    extend,
+    makeSafeForCpp
 } = require('../../utils/utils');
 
 module.exports = class extends Generator {
@@ -18,12 +19,20 @@ module.exports = class extends Generator {
             desc: 'include native sdk'
         });
 
-        this.option('tool', {
+        this.option('utils', {
             type: Boolean,
             required: false,
             default: false,
-            desc: 'include tool scripts'
+            desc: 'include utils code'
         });
+
+        this.option('object', {
+            type: String,
+            required: false,
+            default: '',
+            desc: 'include object wrap'
+        });
+
     }
 
     initializing() {
@@ -68,9 +77,12 @@ module.exports = class extends Generator {
         if (this.options.sdk) {
             this.log('sdk is true');
         }
-        if (this.options.tool) {
-            this.log('tool is true');
-            this.composeWith(require.resolve('../tool'));
+        if (this.options.utils) {
+            this.log('utils is true');
+        }
+        if (this.options.object) {
+            this.log('object is true');
+            this.props.object = makeSafeForCpp(this.options.object);
         }
     }
 
@@ -99,20 +111,118 @@ module.exports = class extends Generator {
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
 
-        const files = [
+        const currentGyp = this.fs.readJSON(this.destinationPath('binding.gyp'), {});
+        const gypTempl = {
+            'target_name': safePkgName(pkg.name),
+            'include_dirs': [
+                '<!@(node -p "require(\'node-addon-api\').include")',
+                'src',
+            ],
+            'sources': [
+                'src/main.cc',
+            ],
+            'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS', 'UNICODE'],
+            'cflags!': [
+                '-fno-exceptions'
+            ],
+            'cflags_cc!': [
+                '-fno-exceptions'
+            ],
+            'conditions': [
+                [
+                    'OS==\'win\'', {
+                        'defines': [
+                            '_UNICODE',
+                            '_WIN32_WINNT=0x0601'
+                        ],
+                        'configurations': {
+                            'Release': {
+                                'msvs_settings': {
+                                    'VCCLCompilerTool': {
+                                        'ExceptionHandling': 1,
+                                    }
+                                }
+                            },
+                            'Debug': {
+                                'msvs_settings': {
+                                    'VCCLCompilerTool': {
+                                        'ExceptionHandling': 1,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            ]
+        };
+
+        if (this.options.utils) {
+            gypTempl.sources = gypTempl.sources.concat([
+                'src/utils/n-utils.h',
+                'src/utils/win-utils.h',
+                'src/utils/node_async_call.h',
+                'src/utils/node_async_call.cc',
+            ]);
+        }
+
+        if (this.props.object) {
+            gypTempl.sources = gypTempl.sources.concat([
+                `src/${this.props.object}.h`,
+                `src/${this.props.object}.cc`,
+            ]);
+        }
+
+        const gyp = extend({
+            targets: [
+                gypTempl
+            ]
+        }, currentGyp);
+
+        this.fs.writeJSON(this.destinationPath('binding.gyp'), gyp);
+
+        const tmplfiles = [
             'js/index.js',
             'js/index.d.ts',
-            'src/main.cc',
-            'binding.gyp'
         ];
 
-        files.forEach((value) => {
+        tmplfiles.forEach((value) => {
             this.fs.copyTpl(
                 this.templatePath(value + '.tmpl'),
                 this.destinationPath(value), {
                     pkgName: pkg.name,
                     pkgSafeName: safePkgName(pkg.name),
                 }
+            );
+        });
+
+        if (this.props.object) {
+            ['h', 'cc'].forEach(value => {
+                this.fs.copyTpl(
+                    this.templatePath(`src/object.${value}.tmpl`),
+                    this.destinationPath(`src/${this.props.object}.${value}`), {
+                        objectName: this.props.object,
+                    }
+                );
+            });
+
+        }
+
+        let files = [
+            'src/main.cc',
+        ];
+        if (this.options.utils) {
+            files = files.concat([
+                'src/utils/n-utils.h',
+                'src/utils/win-utils.h',
+                'src/utils/node_async_call.h',
+                'src/utils/node_async_call.cc',
+            ]);
+        }
+
+        files.forEach((value) => {
+            this.fs.copy(
+                this.templatePath(value),
+                this.destinationPath(value)
             );
         });
 
