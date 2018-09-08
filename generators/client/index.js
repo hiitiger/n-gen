@@ -140,8 +140,7 @@ module.exports = class extends Generator {
                 this.templatePath(value + '.tmpl'),
                 this.destinationPath(value), {
                     pkgName: pkg.name,
-                    pkgSafeName: safePkgName(pkg.name),
-                    companyName: pkg.name,
+                    pkgSafeName: safePkgName(pkg.name)
                 }
             );
         });

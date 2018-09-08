@@ -2,9 +2,15 @@ import sdk from "./preload/sdk";
 import settings from "./preload/settings";
 import logger from "./preload/logger";
 
-const api = { sdk, settings, logger };
+import { remote } from "electron";
+
+const <%= pkgSafeName %> = { sdk, settings, logger };
 
 process.once("loaded", () => {
     const window: any = global;
-    window.api = api;
+    window.<%= pkgSafeName %> = <%= pkgSafeName %>;
+
+    if (remote.getGlobal("DEBUG")) {
+        window.__devtron = { require, process };
+    }
 });

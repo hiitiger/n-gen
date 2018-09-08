@@ -10,11 +10,23 @@
             background-color: rgb(61, 70, 73);
         }
 
-        .content {
-            position: absolute;
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .caption {
             width: 100%;
-            height: 100%;
+            height: 100px;
+            background-color: rgb(104, 166, 187);
             -webkit-app-region: drag;
+        }
+
+        .content {
+            width: 100%;
+            flex: 1;
+            background-color: rgb(116, 104, 187);
         }
 
         .title {
@@ -30,13 +42,17 @@
 </head>
 
 <body>
-    <div class="content">
-        <label class="title">Hello Electron!!</label>
-        <button id="quit">Click to quit</button>
-        <button id="load">Click to load</button>
-    </div>
+    <div class="container">
+        <div class="caption">
+            <label class="title">Hello Electron!!</label>
+        </div>
+        <div class="content">
+            <button id="quit">Click to quit</button>
+            <button id="load">Click to load</button>
+            <div></div>
+        </div>
 
-    <script src="../renderer/renderer.js"></script>
+        <script src="../renderer/renderer.js"></script>
 </body>
 
 </html>

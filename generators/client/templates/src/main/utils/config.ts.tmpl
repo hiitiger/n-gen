@@ -15,12 +15,10 @@ function fileUrl(str: string) {
 
 const CONFIG: any = {};
 
-CONFIG.companyName = "<%= companyName %>";
 CONFIG.appName = "<%= pkgName %>";
 
 CONFIG.appDataDir = path.join(
     ElectronApp.getPath("appData"),
-    CONFIG.companyName.toLowerCase(),
     CONFIG.appName.toLowerCase()
 );
 

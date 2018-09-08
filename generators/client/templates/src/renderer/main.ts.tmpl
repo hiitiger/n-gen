@@ -9,4 +9,4 @@ const quit = () => {
 const quitButton = document.getElementById("quit") as HTMLButtonElement;
 quitButton.addEventListener("click", quit);
 
-const { api } = window as any;
+const { <%= pkgSafeName %> } = window as any;
