@@ -2,23 +2,25 @@
 
 ## install
 
-yarn global add @hiitiger/generator-n-gen
+npm i -g @hiitiger/generator-n-gen
 
 ## usage
 
-* generate node addon project
+-   generate node addon project
+
 ```
     $ yo @hiitiger/n-gen:addon
+
+    $ yo @hiitiger/n-gen:addon --utils --object=myobj --sdk
 ```
 
-
-* generate electron project
+-   generate electron project
 
 ```
     $ yo @hiitiger/n-gen:client
 ```
 
-* generate tooling scripts
+-   generate tooling scripts
 
 ```
     $ yo @hiitiger/n-gen:tool
