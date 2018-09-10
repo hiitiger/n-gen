@@ -117,6 +117,7 @@ module.exports = class extends Generator {
         const files = [
             'src/main/main.ts',
             'src/main/global.d.ts',
+            'src/main/electron/singleinstance.ts',
             'src/main/electron/app-entry.ts',
             'src/main/electron/events.ts',
             'src/main/electron/webpreload.ts',

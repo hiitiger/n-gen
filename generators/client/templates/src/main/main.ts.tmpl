@@ -20,41 +20,12 @@ function installDevtron() {
     console.log("Installed Devtron");
 }
 
-function installVueDevtool() {
-    const dir = path.join(
-        process.env.LOCALAPPDATA!,
-        "Google/Chrome/User Data/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd"
-    );
-    if (fs.existsSync(dir)) {
-        const files = fs
-            .readdirSync(dir)
-            .map(filename => {
-                const file = path.join(dir, filename);
-                return {
-                    file,
-                    mtime: fs.statSync(file).mtime
-                };
-            })
-            .sort((a, b) => {
-                return a.mtime > b.mtime ? -1 : 1;
-            });
-
-        // tslint:disable-next-line:variable-name
-        const vue_dev_extension = files.length ? files[0].file : null;
-        if (vue_dev_extension && fs.existsSync(vue_dev_extension)) {
-            logger("main").info("install vue devtool", vue_dev_extension);
-            BrowserWindow.addDevToolsExtension(vue_dev_extension);
-        }
-    }
-}
-
 function installDevtools() {
     installDevtron();
-    installVueDevtool();
 }
 
 function setupDirs() {
-    const subDirs = ["cache", "log"];
+    const subDirs = ["log"];
     fse.ensureDirSync(global.CONFIG.appDataDir);
     subDirs.forEach(dir => {
         dir = path.join(global.CONFIG.appDataDir, dir);

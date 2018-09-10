@@ -1,0 +1,24 @@
+import { app as ElectronApp } from "electron";
+
+function start(
+    successCallback: () => void,
+    newProcessCallback: (argv: string[]) => void,
+) {
+    const gotTheLock = ElectronApp.requestSingleInstanceLock();
+
+    if (!gotTheLock) {
+        ElectronApp.quit();
+        return;
+    }
+
+    ElectronApp.on(
+        "second-instance",
+        (event, argv: string[], workingDirectory) => {
+            newProcessCallback(argv);
+        },
+    );
+
+    successCallback();
+}
+
+export { start };
