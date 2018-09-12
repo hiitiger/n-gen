@@ -95,6 +95,7 @@ module.exports = class extends Generator {
                 'build:renderer': 'webpack --config webpack.config.renderer.js',
                 'start': 'electron . --enable-logging',
                 'compile:electron': 'electron-rebuild -v 3.0.0-beta.7 --arch=ia32',
+                'package:dir': 'npm run build && electron-builder --dir'
             },
             devDependencies: {
                 '@types/fs-extra': '^5.0.4',
@@ -110,6 +111,39 @@ module.exports = class extends Generator {
                 'webpack-cli': '^3.1.0',
                 'awesome-typescript-loader': '^5.2.0'
             },
+            'build': {
+                'productName': currentPkg.name || this.props.name,
+                'compression': 'maximum',
+                'directories': {
+                    'buildResources': './assets',
+                    'output': './release'
+                },
+                'win': {
+                    'icon': 'app.ico'
+                },
+                'electronDist': './node_modules/electron/dist',
+                'npmRebuild': false,
+                'asar': true,
+                'extraResources': [
+                    'assets'
+                ],
+                'files': [{
+                    'from': 'dist',
+                    'to': 'dist',
+                    'filter': [
+                        '**/*',
+                        '!**/*.map'
+                    ]
+                },
+                {
+                    'from': '.',
+                    'to': '.',
+                    'filter': [
+                        'package.json'
+                    ]
+                }
+                ]
+            }
         }, currentPkg);
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
