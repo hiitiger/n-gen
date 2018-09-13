@@ -11,7 +11,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 static const wchar_t k_natvieDelimiter = '\\';
 
-namespace utils
+namespace Windows
 {
 inline std::wstring toNativeFullPath(const std::wstring &path)
 {
@@ -125,4 +125,175 @@ inline std::string local8BitToUtf8(const std::string &str)
 {
     return toUtf8(fromLocal8Bit(str));
 }
-}; // namespace utils
+
+class WaitableEvent
+{
+    WaitableEvent(WaitableEvent &) = delete;
+    WaitableEvent &operator=(const WaitableEvent &) = delete;
+
+    HANDLE handle_ = NULL;
+
+  public:
+    WaitableEvent(bool manualReset = false, bool initialState = false)
+        : handle_(NULL)
+    {
+        handle_ = CreateEvent(NULL, manualReset, initialState, NULL);
+    }
+
+    ~WaitableEvent()
+    {
+        if (handle_)
+        {
+            CloseHandle(handle_);
+        }
+    }
+
+    void set()
+    {
+        SetEvent(handle_);
+    }
+
+    void reset()
+    {
+        ResetEvent(handle_);
+    }
+
+    int wait(unsigned timeout = INFINITE)
+    {
+        DWORD ret = WaitForSingleObject(handle_, timeout);
+        return ret == WAIT_OBJECT_0 ? 0 : -1;
+    }
+
+    bool isSignal()
+    {
+        return (wait(0) == 0);
+    }
+
+    HANDLE handle()
+    {
+        return handle_;
+    }
+};
+
+class Mutex
+{
+    Mutex(Mutex &) = delete;
+    Mutex &operator=(const Mutex &) = delete;
+
+    HANDLE handle_ = NULL;
+
+  public:
+    //probably bad not create here
+    Mutex()
+        : handle_(NULL)
+    {
+    }
+
+    Mutex(bool initialOwner)
+        : handle_(NULL)
+    {
+        handle_ = CreateMutex(NULL, initialOwner, NULL);
+    }
+
+    ~Mutex()
+    {
+        if (handle_)
+        {
+            CloseHandle(handle_);
+        }
+    }
+
+    bool create(bool initialOwner, const std::wstring &name)
+    {
+        handle_ = CreateMutex(NULL, initialOwner, name.c_str());
+        return handle_ != NULL;
+    }
+
+    bool open(const std::wstring &name)
+    {
+        handle_ = OpenMutex(SYNCHRONIZE, FALSE, name.c_str());
+        return handle_ != NULL;
+    }
+
+    void close()
+    {
+        if (handle_)
+        {
+            CloseHandle(handle_);
+            handle_ = nullptr;
+        }
+    }
+
+    void lock()
+    {
+        DWORD ret = WaitForSingleObject(handle_, INFINITE);
+        (void)ret;
+        if (ret == WAIT_ABANDONED)
+        {
+            close();
+        }
+    }
+
+    void unlock()
+    {
+        BOOL ret = ReleaseMutex(handle_);
+        (void)ret;
+    }
+
+    HANDLE handle()
+    {
+        return handle_;
+    }
+};
+
+class Library
+{
+    HMODULE hModule_ = nullptr;
+    Library(const Library &) = delete;
+    Library &operator=(const Library &) = delete;
+
+  public:
+    Library(const wchar_t *libName)
+    {
+        hModule_ = (::LoadLibraryW(libName));
+    }
+
+    ~Library()
+    {
+        if (hModule_)
+        {
+            ::FreeLibrary(hModule_);
+        }
+    };
+
+    Library(Library &&rhs)
+        : hModule_(rhs.hModule_)
+    {
+        rhs.hModule_ = HMODULE(0);
+    };
+
+    Library &operator=(Library &&rhs)
+    {
+        hModule_ = rhs.hModule_;
+        rhs.hModule_ = HMODULE(0);
+        return *this;
+    };
+
+    template <typename FuncPtrType>
+    FuncPtrType GetProcAddress(const char *procName) const
+    {
+        return (FuncPtrType)(::GetProcAddress(hModule_, procName));
+    };
+
+    bool loaded() const
+    {
+        return !!hModule_;
+    }
+
+    HMODULE module() const
+    {
+        return hModule_;
+    }
+};
+
+}; // namespace Windows
