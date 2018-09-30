@@ -100,7 +100,7 @@ module.exports = class extends Generator {
             types: './js/index.d.ts',
             dependencies: {
                 'node-addon-api': '^1.4.0',
-                'node-gyp': '^3.7.0'
+                'node-gyp': '^3.8.0'
             },
             scripts: {
                 'install': 'node-gyp rebuild',
