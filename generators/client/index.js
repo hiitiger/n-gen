@@ -23,6 +23,12 @@ module.exports = class extends Generator {
             default: false,
             desc: 'include tool scripts'
         });
+
+        this.option('min', {
+            type: Boolean,
+            required: true,
+            desc: 'include preload api'
+        });
     }
 
     initializing() {
@@ -72,6 +78,10 @@ module.exports = class extends Generator {
             this.log('tool is true');
             this.composeWith(require.resolve('../tool'));
         }
+
+        if (this.options.min) {
+            this.log('api is true');
+        }
     }
 
     writing() {
@@ -94,14 +104,14 @@ module.exports = class extends Generator {
                 'build:main': 'tsc',
                 'build:renderer': 'webpack --config webpack.config.renderer.js',
                 'start': 'electron . --enable-logging',
-                'compile:electron': 'electron-rebuild -v 3.0.0-beta.7 --arch=ia32',
+                'compile:electron': 'electron-rebuild -v 3.0.7 --arch=ia32',
                 'package:dir': 'npm run build && electron-builder --dir'
             },
             devDependencies: {
                 '@types/fs-extra': '^5.0.4',
                 'cross-env': '^5.2.0',
                 'devtron': '^1.4.0',
-                'electron': '3.0.0-beta.7',
+                'electron': '3.0.7',
                 'electron-builder': '^20.28.2',
                 'electron-rebuild': '^1.8.1',
                 'node-gyp': '^3.7.0',
@@ -148,27 +158,36 @@ module.exports = class extends Generator {
 
         this.fs.writeJSON(this.destinationPath('package.json'), pkg);
 
-        const files = [
-            'src/main/main.ts',
-            'src/main/global.d.ts',
-            'src/main/electron/singleinstance.ts',
-            'src/main/electron/app-entry.ts',
-            'src/main/electron/events.ts',
-            'src/main/electron/webpreload.ts',
-            'src/main/electron/native/sdk.ts',
-            'src/main/electron/native/settings.ts',
-            'src/main/electron/preload/sdk.ts',
-            'src/main/electron/preload/settings.ts',
-            'src/main/electron/preload/logger.ts',
-            'src/main/utils/debug.ts',
-            'src/main/utils/config.ts',
-            'src/main/utils/logger.ts',
+        let files;
+        if (this.options.min) {
+            files = [
+                'tslint.json',
+                'tsconfig.json',
+                'webpack.config.renderer.js',
+            ];
+        } else {
+            files = [
+                'src/main/main.ts',
+                'src/main/global.d.ts',
+                'src/main/electron/singleinstance.ts',
+                'src/main/electron/app-entry.ts',
+                'src/main/electron/events.ts',
+                'src/main/electron/webpreload.ts',
+                'src/main/electron/native/sdk.ts',
+                'src/main/electron/native/settings.ts',
+                'src/main/electron/preload/sdk.ts',
+                'src/main/electron/preload/settings.ts',
+                'src/main/electron/preload/logger.ts',
+                'src/main/utils/debug.ts',
+                'src/main/utils/config.ts',
+                'src/main/utils/logger.ts',
 
-            'src/renderer/main.ts',
-            'tslint.json',
-            'tsconfig.json',
-            'webpack.config.renderer.js',
-        ];
+                'src/renderer/main.ts',
+                'tslint.json',
+                'tsconfig.json',
+                'webpack.config.renderer.js',
+            ];
+        }
 
         files.forEach((value) => {
             this.fs.copyTpl(
@@ -179,6 +198,19 @@ module.exports = class extends Generator {
                 }
             );
         });
+
+        if (this.options.min) {
+            this.fs.copyTpl(this.templatePath('src/min/main/main.ts.tmpl'),
+                this.destinationPath('src/main/main.ts'), {
+                    pkgName: pkg.name,
+                    pkgSafeName: safePkgName(pkg.name)
+                });
+            this.fs.copyTpl(this.templatePath('src/min/renderer/main.ts.tmpl'),
+                this.destinationPath('src/renderer/main.ts'), {
+                    pkgName: pkg.name,
+                    pkgSafeName: safePkgName(pkg.name)
+                });
+        }
 
         this.fs.copy(this.templatePath('assets'), this.destinationPath('assets'));
         this.fs.copy(this.templatePath('dist'), this.destinationPath('dist'));

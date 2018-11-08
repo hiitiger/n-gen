@@ -1,0 +1,59 @@
+import { app as ElectronApp, BrowserWindow, ipcMain } from "electron";
+
+import * as path from "path";
+
+function installDevtron() {
+    console.log("Installing Devtron");
+    const devtron = require("devtron");
+    devtron.uninstall();
+    devtron.install();
+    console.log("Installed Devtron");
+}
+
+function installDevtools() {
+    installDevtron();
+}
+
+function onElectronReady() {
+    installDevtools();
+}
+
+let mainWindow: BrowserWindow;
+
+function startApp() {
+    const options = {
+        minWidth: 1280,
+        minHeight: 768,
+        width: 1280,
+        height: 768,
+        show: true,
+        frame: false,
+        center: true,
+        backgroundColor: "#282b30",
+        webPreferences: {
+            nodeIntegration: true
+        }
+    };
+    mainWindow = new BrowserWindow(options);
+    mainWindow.loadFile(path.join(__dirname, "../index/index.html"));
+
+    mainWindow.webContents.on(
+        "before-input-event",
+        (event: Electron.Event, input: Electron.Input) => {
+            if (input.key === "F12" && input.type === "keyDown") {
+                mainWindow.webContents.openDevTools();
+            }
+        }
+    );
+
+    ipcMain.on("__QUIT__", () => mainWindow.close());
+}
+
+ElectronApp.on("ready", () => {
+    onElectronReady();
+    startApp();
+});
+
+ElectronApp.on("window-all-closed", () => {
+    ElectronApp.quit();
+});

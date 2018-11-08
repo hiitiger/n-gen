@@ -1,0 +1,11 @@
+import { ipcRenderer, remote } from "electron";
+
+
+const quit = () => {
+    ipcRenderer.send("__QUIT__");
+};
+
+const quitButton = document.getElementById("quit") as HTMLButtonElement;
+quitButton.addEventListener("click", quit);
+
+const { <%= pkgSafeName %> } = window as any;
