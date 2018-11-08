@@ -12,16 +12,28 @@ npm i -g @hiitiger/generator-n-gen
     $ yo @hiitiger/n-gen:addon
 
     $ yo @hiitiger/n-gen:addon --utils --object=myobj --sdk
+
 ```
 
--   generate electron project
+-   options
+    -   utils
+    -   object
+    -   sdk
+
+*   generate electron project
 
 ```
     $ yo @hiitiger/n-gen:client
+
 ```
 
--   generate tooling scripts
+-   options
+    -   min
+    -   tool
+
+*   generate tooling scripts
 
 ```
     $ yo @hiitiger/n-gen:tool
+
 ```
